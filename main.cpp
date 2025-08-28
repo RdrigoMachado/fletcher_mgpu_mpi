@@ -36,11 +36,11 @@ int main(int argc, char** argv){
     grid_size = sx * sy * sz;
     grid_byte_size = grid_size * sizeof(float);
 
-    cudaGetDeviceCount(&num_gpus_available);
-    gpu_id = rank % num_gpus_available;
+    int needed_gpus = num_gpus / comm_size;
+    gpu_id = rank % needed_gpus;
     cudaSetDevice(gpu_id);
 
-    printf("Rank %d OK | GROUP SIZE %d\n", rank, num_gpus_available);
+    printf("Rank %d OK | GROUP SIZE %d\n", rank, comm_size);
     printf("#%d - Malloc memory on GPU: %d (Size: %d)\n",rank, gpu_id, grid_size);
     cudaMalloc(&grid, grid_byte_size);
 
