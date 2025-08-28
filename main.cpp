@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <mpi.h>
 #include <cuda_runtime.h>
+#include <unistd.h>  // <-- para sleep()
 
 #define RAIO 8
 float* grid;
@@ -22,7 +23,6 @@ int main(int argc, char** argv){
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
-    printf("Rank %d OK\n", rank);
 
     nx = atoi(argv[1]);
     ny = atoi(argv[2]);
@@ -35,17 +35,19 @@ int main(int argc, char** argv){
     halo_size = sx * sy * RAIO;
     grid_size = sx * sy * sz;
     grid_byte_size = grid_size * sizeof(float);
-    gpu_id = rank % num_gpus_available;
 
     cudaGetDeviceCount(&num_gpus_available);
+    gpu_id = rank % num_gpus_available;
     cudaSetDevice(gpu_id);
-    printf("#%d - Malloc memory on GPU: %d (Size: %d)",rank, gpu_id, grid_size);
+
+    printf("Rank %d OK\n", rank);
+    printf("#%d - Malloc memory on GPU: %d (Size: %d)\n",rank, gpu_id, grid_size);
     cudaMalloc(&grid, grid_byte_size);
-    
+
+    sleep(10);
 
 
-
-    printf("#%d - Freeing memory on GPU: %d", rank, gpu_id);
+    printf("#%d - Freeing memory on GPU: %d\n", rank, gpu_id);
     cudaFree(grid);
     MPI_Finalize();
     return 0;
