@@ -40,7 +40,7 @@ int main(int argc, char** argv){
     gpu_id = rank % num_gpus_available;
     cudaSetDevice(gpu_id);
 
-    printf("Rank %d OK\n", rank);
+    printf("Rank %d OK | GROUP SIZE %d\n", rank, num_gpus_available);
     printf("#%d - Malloc memory on GPU: %d (Size: %d)\n",rank, gpu_id, grid_size);
     cudaMalloc(&grid, grid_byte_size);
 
