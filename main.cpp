@@ -3,16 +3,6 @@
 #include <mpi.h>
 #include <unistd.h>  // <-- para sleep()
 
-int get_gpu_id(){
-    int local_rank;
-    MPI_Comm local_comm;
-    MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED,
-                        0, MPI_INFO_NULL, &local_comm);
-    MPI_Comm_rank(local_comm, &local_rank);
-    MPI_Comm_free(&local_comm);
-    return local_rank;
-}
-
 int main(int argc, char** argv){
 
     MPI_Init(&argc, &argv);
@@ -28,7 +18,6 @@ int main(int argc, char** argv){
     int grid_byte_size;
     int num_steps;
     int num_gpus;
-    int gpu_id;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
@@ -45,9 +34,8 @@ int main(int argc, char** argv){
     grid_size = sx * sy * sz;
     grid_byte_size = grid_size * sizeof(float);
 
-    gpu_id = get_gpu_id();
 
-    backend_init(gpu_id);
+    backend_init(rank, comm_size, sx, sy, sz);
     {
         sleep(10);
     }
