@@ -27,22 +27,15 @@ int main(int argc, char** argv){
     nz = atoi(argv[3]);
     num_steps = atoi(argv[4]);
     num_gpus = atoi(argv[5]);
-
-    //                 SX and SY
-    //
-    // ||         |       |      |       |        ||
-    // || ABSORDB | BOARD | DATA | BOARD | ABSORB ||
-    // ||         |       |      |       |        ||
-
-    sx = ABSORB + BOARD_SIZE + nx + BOARD_SIZE + ABSORB;
-    sy = ABSORB + BOARD_SIZE + ny + BOARD_SIZE + ABSORB;
-    sz = nz / num_gpus;
-
+    sx = RAIO + nx + RAIO;
+    sy = RAIO + ny + RAIO;
+    sz = RAIO + (nz / num_gpus) + RAIO;
+    halo_size = sx * sy * RAIO;
+    grid_size = sx * sy * sz;
+    grid_byte_size = grid_size * sizeof(float);
 
     backend_init(rank, comm_size, sx, sy, sz);
-    backend_data_initialize(sx, sy, sz);
     backend_run(num_steps);
-    printf("Rank %d - comm_size %d\n", rank, comm_size);
     sleep(5);
     backend_finalize();
 

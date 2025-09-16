@@ -2,6 +2,13 @@
 #include <cuda_runtime.h>
 
 cudaStream_t streams[2];
+float *buffer_out[2];
+float *buffer_in[2];
+int sxsysz;
+int sx, sy, sz_slice;
+int process_num;
+int universe_size;
+
 float* dev_ch1dxx;
 float* dev_ch1dyy;
 float* dev_ch1dzz;
@@ -16,21 +23,32 @@ float* dev_pp;
 float* dev_pc;
 float* dev_qp;
 float* dev_qc;
-int sxsysz;
-int slice_number;
+
 
 void backend_init(int rank, int comm_size, int sx, int sy, int sz){
-    int deviceCount, gpu_id, num_boards = 1;
-    if(0 != rank && comm_size - 1 != rank)
-        num_boards = 2;
-    sxsysz = sx * sy * sz + (num_boards * BOARD_SIZE);
-    slice_number = rank;
+    int deviceCount, gpu_id;
+    int first = 0, last = comm_size - 1;
+    process_num     = rank;
+    universe_size   = comm_size;
 
     cudaGetDeviceCount(&deviceCount);
     gpu_id = rank % deviceCount;
     cudaSetDevice(gpu_id);
     cudaStreamCreate(&streams[HALO]);
     cudaStreamCreate(&streams[COMPUTE]);
+
+    if(rank == first){
+        sxsysz = sx * sy * (ABSORB + BOARD_SIZE + sz);
+    } else if (rank == last){
+        sxsysz = sx * sy * (sz + BOARD_SIZE + ABSORB);
+    } else {
+        sxsysz = sx * sy * (BOARD_SIZE + sz + BOARD_SIZE);
+    }
+    cudaMallocHost(&buffer_out[LEFT],  sxsysz * sizeof(float));
+    cudaMallocHost(&buffer_in[LEFT],   sxsysz * sizeof(float));
+
+    cudaMallocHost(&buffer_out[RIGHT], sxsysz * sizeof(float));
+    cudaMallocHost(&buffer_in[RIGHT],  sxsysz * sizeof(float));
 }
 
 void backend_data_initialize(int sx, int sy, int sz){
@@ -40,18 +58,19 @@ void backend_data_initialize(int sx, int sy, int sz){
     cudaMalloc(&dev_ch1dxy, sxsysz * sizeof(float));
     cudaMalloc(&dev_ch1dyz, sxsysz * sizeof(float));
     cudaMalloc(&dev_ch1dxz, sxsysz * sizeof(float));
-    cudaMalloc(&dev_v2px, sxsysz * sizeof(float));
-    cudaMalloc(&dev_v2pz, sxsysz * sizeof(float));
-    cudaMalloc(&dev_v2sz, sxsysz * sizeof(float));
-    cudaMalloc(&dev_v2pn, sxsysz * sizeof(float));
-    cudaMalloc(&dev_pp, sxsysz * sizeof(float));
-    cudaMalloc(&dev_pc, sxsysz * sizeof(float));
-    cudaMalloc(&dev_qp, sxsysz * sizeof(float));
-    cudaMalloc(&dev_qc, sxsysz * sizeof(float));
+    cudaMalloc(&dev_v2px,   sxsysz * sizeof(float));
+    cudaMalloc(&dev_v2pz,   sxsysz * sizeof(float));
+    cudaMalloc(&dev_v2sz,   sxsysz * sizeof(float));
+    cudaMalloc(&dev_v2pn,   sxsysz * sizeof(float));
+    cudaMalloc(&dev_pp,     sxsysz * sizeof(float));
+    cudaMalloc(&dev_pc,     sxsysz * sizeof(float));
+    cudaMalloc(&dev_qp,     sxsysz * sizeof(float));
+    cudaMalloc(&dev_qc,     sxsysz * sizeof(float));
 }
 
 void backend_run(int num_steps){
-
+    // insert_source();
+    // swap_borders(int universe_size, int process_num, );
 }
 
 void backend_finalize(){

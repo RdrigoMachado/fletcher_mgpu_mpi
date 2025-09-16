@@ -42,3 +42,22 @@
 using HostMemSpace   = Kokkos::HostSpace;
 // É mais seguro usar o memory_space do Execution Space que você definiu
 using DeviceMemSpace = ExecSpaceType::memory_space;
+
+struct Backend_Data{
+    ExecSpaceType exec_spaces[2];
+    Kokkos::View<float*, DeviceMemSpace> dev_ch1dxx;
+    Kokkos::View<float*, DeviceMemSpace> dev_ch1dyy;
+    Kokkos::View<float*, DeviceMemSpace> dev_ch1dzz;
+    Kokkos::View<float*, DeviceMemSpace> dev_ch1dxy;
+    Kokkos::View<float*, DeviceMemSpace> dev_ch1dyz;
+    Kokkos::View<float*, DeviceMemSpace> dev_ch1dxz;
+    Kokkos::View<float*, DeviceMemSpace> dev_v2px;
+    Kokkos::View<float*, DeviceMemSpace> dev_v2pz;
+    Kokkos::View<float*, DeviceMemSpace> dev_v2sz;
+    Kokkos::View<float*, DeviceMemSpace> dev_v2pn;
+    Kokkos::View<float*, DeviceMemSpace> dev_pp;
+    Kokkos::View<float*, DeviceMemSpace> dev_pc;
+    Kokkos::View<float*, DeviceMemSpace> dev_qp;
+    Kokkos::View<float*, DeviceMemSpace> dev_qc;
+    streamType stream_halo, stream_compute;
+};
